@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Sachtext-Detektiv</title>
+<link rel="icon" href="data:,">
+<style>
+:root{
+  --bg:#f6f4ee; --card:#ffffff; --ink:#1c2330; --muted:#4a5363; --line:#d6d0c2;
+  --accent:#2a4a7a; --accent-ink:#ffffff;
+  --blue:#1d5ca3; --blue-bg:#e5eefa;
+  --orange:#8f4700; --orange-bg:#fff0db; --orange-line:#dd8628;
+  --green:#1b6a35; --green-bg:#e0f2e5; --green-line:#3a9758;
+  --mark:#fff09a; --mark-line:#cdb53c;
+  --hover:#efebe1;
+}
+*{box-sizing:border-box}
+html{font-size:20px;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+button{font:inherit;color:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 160px}
+
+/* Kopf */
+.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top-inner{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.1rem;color:var(--accent)}
+.brand svg{width:34px;height:34px}
+.lvl{font-size:.9rem;font-weight:600;background:var(--blue-bg);color:var(--blue);border-radius:999px;padding:4px 14px}
+.spacer{flex:1}
+.restart{min-height:44px;font-size:.9rem;background:transparent;border:2px solid var(--line);border-radius:10px;padding:6px 14px;cursor:pointer}
+.restart:hover{background:var(--hover)}
+.prog{width:100%;display:flex;align-items:center;gap:12px}
+.prog-bar{flex:1;height:14px;background:#e3ded2;border-radius:999px;overflow:hidden}
+.prog-fill{height:100%;background:var(--accent);border-radius:999px;transition:width .4s}
+.prog-txt{font-size:.9rem;color:var(--muted);white-space:nowrap}
+
+/* Karten und Texte */
+h1{font-size:1.6rem;line-height:1.25;margin:28px 0 8px}
+h2{font-size:1.35rem;line-height:1.3;margin:24px 0 10px}
+.lead{color:var(--muted);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin:16px 0}
+.strat{border-left:8px solid var(--accent)}
+.strat .num{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;margin-right:10px}
+.strat h2{margin:0 0 8px;display:flex;align-items:center}
+.strat p{margin:6px 0}
+.rule{display:inline-block;margin-top:6px;font-weight:700;background:var(--mark);border:2px solid var(--mark-line);border-radius:10px;padding:4px 12px}
+
+/* Knöpfe */
+.btn{min-height:52px;min-width:44px;padding:10px 24px;border-radius:12px;border:2px solid var(--accent);background:var(--accent);color:var(--accent-ink);font-weight:600;cursor:pointer}
+.btn:hover{filter:brightness(1.12)}
+.btn.sec{background:#fff;color:var(--accent)}
+.btn.sec:hover{background:var(--blue-bg);filter:none}
+.btn[disabled]{opacity:.45;cursor:not-allowed;filter:none}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:18px 0}
+.levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin:22px 0}
+.level-btn{min-height:140px;border-radius:18px;border:3px solid var(--accent);background:#fff;cursor:pointer;font-size:1.5rem;font-weight:700;color:var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.level-btn small{font-size:.9rem;font-weight:500;color:var(--muted)}
+.level-btn:hover{background:var(--blue-bg)}
+
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin:14px 0}
+.choice{min-height:56px;text-align:left;padding:12px 16px;border-radius:12px;border:2px solid var(--line);background:#fff;cursor:pointer;line-height:1.35}
+.choice:hover{background:var(--hover)}
+.choice[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-bg);font-weight:600}
+.choice.ok{border-color:var(--green-line);background:var(--green-bg);color:var(--green);font-weight:600}
+.choice.tried{border-color:var(--orange-line);background:var(--orange-bg);color:var(--orange)}
+.choice[disabled]{cursor:default}
+
+.fb{border-radius:12px;padding:12px 16px;margin:10px 0;border-left:8px solid}
+.fb p{margin:4px 0}
+.fb-blue{background:var(--blue-bg);border-color:var(--blue);color:#163f70}
+.fb-orange{background:var(--orange-bg);border-color:var(--orange-line);color:#6e3600}
+.fb-green{background:var(--green-bg);border-color:var(--green-line);color:#14522a}
+
+/* Text */
+.text{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 26px;margin:16px 0}
+.text h2.ttl{font-size:1.45rem;margin:0 0 10px}
+.text h3{font-size:1.15rem;margin:22px 0 4px}
+.text p{margin:0 0 14px}
+.text.tap p{line-height:2.3}
+.s{border-radius:6px;padding:9px 3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.tap .s{cursor:pointer}
+.tap .s:hover{background:var(--hover)}
+.s:focus-visible{outline:3px solid var(--blue);outline-offset:1px}
+.s.marked{background:var(--mark);box-shadow:inset 0 -3px 0 var(--mark-line)}
+.s.key-hit{background:var(--green-bg);box-shadow:inset 0 -3px 0 var(--green-line)}
+.s.key-miss{background:var(--blue-bg);box-shadow:inset 0 -3px 0 var(--blue)}
+.s.beleg-ok{background:var(--green-bg);box-shadow:inset 0 -3px 0 var(--green-line)}
+.s.beleg-try{background:var(--orange-bg)}
+.s.beleg-partner{background:var(--blue-bg)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.9rem;margin:6px 0}
+.legend span{padding:2px 10px;border-radius:6px}
+.hidden-lines{margin:6px 0 16px}
+.hidden-lines i{display:block;height:14px;margin:9px 0;background:#e6e1d6;border-radius:7px}
+.hidden-lines i:nth-child(2){width:92%}
+.hidden-lines i:nth-child(3){width:64%}
+.first{margin:0}
+
+figure{margin:12px 0 18px}
+figure svg{width:100%;height:auto;max-width:620px;display:block;border-radius:12px;border:1px solid var(--line)}
+figcaption{font-size:.9rem;color:var(--muted);margin-top:6px}
+
+.counter{font-weight:600}
+input.q{width:100%;min-height:56px;font:inherit;padding:10px 14px;border:2px solid var(--line);border-radius:12px;background:#fff}
+input.q:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-bg)}
+label.ql{display:block;font-weight:600;margin:14px 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.chip{min-height:48px;min-width:64px;padding:8px 16px;border-radius:999px;border:2px solid var(--blue);background:#fff;color:var(--blue);font-weight:600;cursor:pointer}
+.chip:hover{background:var(--blue-bg)}
+
+.qcard .qnum{font-size:.9rem;color:var(--muted);font-weight:600}
+.qcard h2{margin:6px 0 10px}
+.qcard .choices{grid-template-columns:1fr}
+.knobel{display:inline-block;font-size:.9rem;font-weight:700;background:var(--blue-bg);color:var(--blue);border-radius:8px;padding:2px 10px;margin-bottom:4px}
+.rb{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.rb .choice{min-width:130px;text-align:center}
+.myq{font-weight:600;font-size:1.05rem}
+
+.code{font-size:3.2rem;font-weight:800;letter-spacing:.12em;text-align:center;color:var(--accent);background:#fff;border:4px dashed var(--accent);border-radius:18px;padding:22px 10px;margin:20px 0;word-break:break-word}
+.center{text-align:center}
+
+/* Rückmeldebalken unten */
+#toast{position:fixed;left:0;right:0;bottom:0;z-index:10;padding:0 16px 16px;pointer-events:none}
+#toast .fb{max-width:1068px;margin:0 auto;box-shadow:0 6px 24px rgba(0,0,0,.18);pointer-events:none;font-size:1rem}
+#toast[hidden]{display:none}
+
+@media (min-width:900px) and (orientation:landscape){
+  .split{display:grid;grid-template-columns:minmax(330px,2fr) 3fr;gap:22px;align-items:start}
+  .split .side{position:sticky;top:120px}
+}
+@media (max-width:600px){
+  .text{padding:16px}
+  .code{font-size:2.2rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" stroke-width="4"/><line x1="24" y1="24" x2="36" y2="36" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>
+      <span>Sachtext-Detektiv</span>
+    </div>
+    <span class="lvl" id="lvl" hidden></span>
+    <span class="spacer"></span>
+    <button class="restart" id="restart" type="button" hidden>Neu starten</button>
+    <div class="prog" id="prog" hidden>
+      <div class="prog-bar" role="progressbar" aria-label="Fortschritt" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+      <span class="prog-txt" id="progTxt"></span>
+    </div>
+  </div>
+</header>
+<main class="wrap" id="app"></main>
+<div id="toast" hidden aria-live="polite"></div>
+
+<script>
+(function () {
+'use strict';
+
+/* ---------- Inhalte ---------- */
+/* Satz-Markierungen: {K} = Schlüsselsatz der LP, {B1}..{B4} = Belegsatz zu Frage 1..4,
+   {P4} = Teilstelle zu Frage 4 (hilft, ist aber nicht der Beleg). */
+var FIG = '<figure><svg viewBox="0 0 600 300" role="img" aria-labelledby="figT">' +
+  '<title id="figT">Ein Bartgeier im Flug, daneben ein Kind zum Grössenvergleich</title>' +
+  '<rect width="600" height="300" fill="#e7f0f8"/>' +
+  '<polygon points="0,300 0,230 70,170 120,215 190,140 270,230 330,190 400,250 470,185 540,232 600,200 600,300" fill="#c9cfd6"/>' +
+  '<polygon points="190,140 172,162 206,160" fill="#ffffff"/><polygon points="470,185 455,200 486,199" fill="#ffffff"/>' +
+  '<polygon points="0,300 0,268 60,255 130,262 150,300" fill="#9aa1a8"/>' +
+  '<rect x="0" y="290" width="600" height="10" fill="#8e958c"/>' +
+  /* Spannweiten-Pfeil */
+  '<line x1="162" y1="40" x2="438" y2="40" stroke="#2a4a7a" stroke-width="3"/>' +
+  '<polygon points="160,40 172,33 172,47" fill="#2a4a7a"/><polygon points="440,40 428,33 428,47" fill="#2a4a7a"/>' +
+  '<rect x="252" y="22" width="96" height="34" rx="8" fill="#e7f0f8"/>' +
+  '<text x="300" y="46" text-anchor="middle" font-size="20" font-weight="700" fill="#2a4a7a" font-family="Segoe UI, Arial, sans-serif">fast 3 m</text>' +
+  /* Bartgeier von unten */
+  '<g>' +
+  '<polygon points="290,88 232,78 186,80 162,88 168,94 176,92 172,99 182,98 180,105 190,104 194,110 236,114 290,112" fill="#3f3f44"/>' +
+  '<polygon points="310,88 368,78 414,80 438,88 432,94 424,92 428,99 418,98 420,105 410,104 406,110 364,114 310,112" fill="#3f3f44"/>' +
+  '<polygon points="288,122 312,122 322,158 300,176 278,158" fill="#3f3f44"/>' +
+  '<ellipse cx="300" cy="104" rx="15" ry="28" fill="#c8692e"/>' +
+  '<circle cx="300" cy="72" r="10" fill="#f0e2c4"/>' +
+  '<path d="M296 64 L300 54 L304 64 Z" fill="#555"/>' +
+  '<path d="M297 80 L300 88 L303 80 Z" fill="#2b2b2b"/>' +
+  '</g>' +
+  /* Knochen fällt auf Fels */
+  '<g transform="translate(92 120) rotate(-30)"><rect x="-14" y="-3" width="28" height="6" rx="3" fill="#f4efe2" stroke="#7a7466"/><circle cx="-14" cy="-3" r="4" fill="#f4efe2" stroke="#7a7466"/><circle cx="-14" cy="3" r="4" fill="#f4efe2" stroke="#7a7466"/><circle cx="14" cy="-3" r="4" fill="#f4efe2" stroke="#7a7466"/><circle cx="14" cy="3" r="4" fill="#f4efe2" stroke="#7a7466"/></g>' +
+  '<line x1="92" y1="136" x2="92" y2="246" stroke="#5c6470" stroke-width="2.5" stroke-dasharray="6 6"/>' +
+  '<polygon points="92,256 85,244 99,244" fill="#5c6470"/>' +
+  '<text x="20" y="190" font-size="17" fill="#2c333d" font-family="Segoe UI, Arial, sans-serif">Knochen</text>' +
+  '<text x="20" y="210" font-size="17" fill="#2c333d" font-family="Segoe UI, Arial, sans-serif">fällt auf</text>' +
+  '<text x="20" y="230" font-size="17" fill="#2c333d" font-family="Segoe UI, Arial, sans-serif">den Fels</text>' +
+  /* Kind 1,45 m (Massstab 100 px = 1 m wie die Spannweite) */
+  '<g fill="#2a4a7a"><circle cx="540" cy="158" r="13"/><rect x="527" y="173" width="26" height="58" rx="10"/>' +
+  '<rect x="529" y="226" width="9" height="64" rx="4"/><rect x="542" y="226" width="9" height="64" rx="4"/>' +
+  '<rect x="515" y="176" width="8" height="48" rx="4"/><rect x="557" y="176" width="8" height="48" rx="4"/></g>' +
+  '<line x1="578" y1="145" x2="578" y2="290" stroke="#2a4a7a" stroke-width="2"/>' +
+  '<text x="540" y="136" text-anchor="middle" font-size="17" fill="#2c333d" font-family="Segoe UI, Arial, sans-serif">Kind 1,45 m</text>' +
+  '</svg><figcaption>Abbildung: So gross ist ein Bartgeier. Spannweite und Kind sind im gleichen Massstab gezeichnet.</figcaption></figure>';
+
+var DATA = {
+  '5': {
+    label: '5. Klasse',
+    code: 'VEhDSUVMUkVERUY=',
+    nQuestions: 2,
+    title: 'Der Bartgeier kehrt in die Alpen zurück',
+    paras: [
+      { h: null, s: [
+        'Über den Bergen der Schweiz kreist ein riesiger Vogel.',
+        'Seine Flügel sind von Spitze zu Spitze fast drei Meter breit.',
+        'Trotzdem wiegt er nur fünf bis sieben Kilogramm.',
+        'Es ist der Bartgeier.',
+        'Junge Bartgeier sind dunkelbraun.',
+        'Erwachsene Bartgeier haben eine rostrote Brust.',
+        '{B2} Diese Farbe bekommen sie, wenn sie in eisenhaltigem Schlamm baden.'
+      ]},
+      { h: 'Ein Vogel, der Knochen frisst', s: [
+        'Der Bartgeier jagt keine Tiere.',
+        'Er frisst Tiere, die schon tot sind.',
+        '{K} Seine Nahrung besteht fast nur aus Knochen.',
+        'Kleine Knochen schluckt er ganz.',
+        '{B1} Grosse Knochen lässt er aus grosser Höhe auf Felsen fallen.',
+        'So zerspringen sie in kleine Stücke.',
+        'Sein Magen kann die Knochen verdauen.'
+      ]},
+      { h: 'Warum er verschwunden war', s: [
+        'Früher hatten viele Menschen Angst vor dem Bartgeier.',
+        '{B3} Sie glaubten, er raube Lämmer und sogar kleine Kinder.',
+        'Das stimmte aber nicht.',
+        '{K} Trotzdem jagten die Menschen ihn mit Gewehren, Fallen und Gift.',
+        '{K} Vor über hundert Jahren gab es in den Alpen keinen einzigen Bartgeier mehr.'
+      ]},
+      { h: 'Die Rückkehr', s: [
+        'Fachleute aus mehreren Ländern wollten den Bartgeier zurückholen.',
+        '1986 liessen sie in Österreich die ersten jungen Bartgeier frei.',
+        '{K,B4} 1991 kamen die ersten jungen Bartgeier in den Schweizerischen Nationalpark.',
+        'Sie stammten aus Zuchtstationen und waren etwa drei Monate alt.',
+        'Fliegen konnten sie noch nicht.',
+        'Wenige Wochen später flogen sie zum ersten Mal.',
+        '2007 zog im Nationalpark zum ersten Mal wieder ein Bartgeierpaar selbst ein Junges gross.',
+        'Seither schlüpfen jedes Jahr junge Bartgeier in freier Natur.',
+        '{K} Heute leben in den Alpen wieder einige hundert Bartgeier.'
+      ]}
+    ],
+    overviewHint: 'Lies den Titel. Schau dir die Abbildung an. Überfliege die Zwischentitel.',
+    themes: [
+      { t: 'Was der Bartgeier frisst', ok: true, why: 'Richtig. Der Zwischentitel «Ein Vogel, der Knochen frisst» verrät dieses Thema.' },
+      { t: 'Wie der Bartgeier als Haustier lebt', ok: false, why: 'Davon steht im Titel und in den Zwischentiteln nichts. Der Bartgeier ist ein Wildtier.' },
+      { t: 'Wie der Bartgeier in die Alpen zurückkam', ok: true, why: 'Richtig. Der Titel «… kehrt in die Alpen zurück» und der Zwischentitel «Die Rückkehr» zeigen das.' },
+      { t: 'Bartgeier in Afrika', ok: false, why: 'Der Titel spricht von den Alpen. Kein Zwischentitel nennt Afrika.' },
+      { t: 'Wie schnell der Bartgeier fliegt', ok: false, why: 'Kein Zwischentitel handelt vom Tempo. Die Abbildung zeigt die Grösse, nicht die Geschwindigkeit.' },
+      { t: 'Das Leben der Steinadler', ok: false, why: 'Titel und Zwischentitel handeln nur vom Bartgeier.' }
+    ],
+    ideas: ['Was frisst der Bartgeier?', 'Wie gross ist der Bartgeier?', 'Warum war der Bartgeier verschwunden?', 'Wann kam der Bartgeier zurück?', 'Wo lebt der Bartgeier?', 'Wie alt wird ein Bartgeier?'],
+    questions: [
+      { q: 'Was macht der Bartgeier mit grossen Knochen?',
+        opts: ['Er vergräbt sie im Schnee.', 'Er lässt sie aus grosser Höhe auf Felsen fallen.', 'Er bringt sie ganz in sein Nest.'],
+        correct: 1,
+        hint: 'Noch nicht. Lies nochmals unter dem Zwischentitel «Ein Vogel, der Knochen frisst».',
+        belegHint: 'Dieser Satz ist nicht der Beweis. Suche den Satz, in dem steht, was mit den grossen Knochen passiert.' },
+      { q: 'Woher hat der Bartgeier seine rostrote Farbe?',
+        opts: ['Er badet in eisenhaltigem Schlamm.', 'Die Farbe kommt von seinem Futter.', 'Die Sonne färbt seine Federn.'],
+        /* Beleg: «Diese Farbe bekommen sie, wenn sie in eisenhaltigem Schlamm baden.» */
+        correct: 0,
+        hint: 'Noch nicht. Lies nochmals den ersten Abschnitt, gleich nach dem Titel.',
+        belegHint: 'Dieser Satz ist nicht der Beweis. Suche den Satz, der erklärt, woher die Farbe kommt.' },
+      { q: 'Warum jagten die Menschen früher den Bartgeier?',
+        opts: ['Sie wollten seine Federn verkaufen.', 'Er frass ihnen das Getreide weg.', 'Sie glaubten, er raube Lämmer und Kinder.'],
+        correct: 2,
+        hint: 'Noch nicht. Lies nochmals unter dem Zwischentitel «Warum er verschwunden war».',
+        belegHint: 'Dieser Satz ist nicht der Beweis. Suche den Satz, der sagt, was die Menschen glaubten.' },
+      { q: 'Wann kamen die ersten Bartgeier in den Schweizerischen Nationalpark?',
+        opts: ['1986', '1991', '2007'],
+        correct: 1,
+        hint: 'Noch nicht. Achtung: Im Text stehen drei Jahreszahlen. Lies genau, was in welchem Jahr passiert ist.',
+        belegHint: 'Dieser Satz ist nicht der Beweis. Suche den Satz mit dem Wort «Nationalpark» und der richtigen Jahreszahl.' }
+    ]
+  },
+  '6': {
+    label: '6. Klasse',
+    code: 'RUdVQVJFTERB',
+    nQuestions: 3,
+    title: 'Der Bartgeier kehrt in die Alpen zurück',
+    paras: [
+      { h: null, s: [
+        'Wer im Engadin wandert, sieht mit etwas Glück einen der grössten Vögel Europas über den Gipfeln kreisen.',
+        'Seine Flügel messen von Spitze zu Spitze fast drei Meter, dabei wiegt er nur fünf bis sieben Kilogramm.',
+        'Erwachsene Bartgeier erkennt man an ihrer rostroten Brust.',
+        'Diese Farbe stammt nicht aus den Federn selbst, sondern von Bädern in eisenhaltigem Schlamm.',
+        '{B2} Junge Bartgeier dagegen sind dunkelbraun; erst mit etwa vier Jahren werden Kopf und Brust hell.'
+      ]},
+      { h: null, s: [
+        '{K} Der Bartgeier ist ein Spezialist: Fast neun Zehntel seiner Nahrung bestehen aus Knochen von toten Tieren.',
+        '{B1} Kleinere Knochen verschlingt er ganz, grössere lässt er aus grosser Höhe auf Felsplatten fallen, bis sie zersplittern.',
+        'Sein Magen kann sogar die harten Splitter verdauen.',
+        '{P4} Für die Küken gilt das allerdings noch nicht: In ihren ersten Lebenswochen brauchen sie frisches Muskelfleisch.',
+        '{B4} Gegen Ende des Winters, wenn der Schnee schmilzt, finden die Geier in den Bergen besonders viele Tiere, die den Winter nicht überlebt haben.'
+      ]},
+      { h: null, s: [
+        'Lange Zeit hatte der Bartgeier einen schlechten Ruf.',
+        'Viele Menschen hielten ihn für einen Räuber, der Lämmer und sogar kleine Kinder entführt; deshalb nannte man ihn auch «Lämmergeier».',
+        'In Wirklichkeit greift er keine lebenden Tiere an.',
+        '{K,B3} Trotzdem wurde er mit Gewehren, Fallen und Giftködern verfolgt.',
+        '{K} Vor über hundert Jahren war in den Alpen kein einziger Bartgeier mehr übrig.'
+      ]},
+      { h: null, s: [
+        'Seit 1986 bringen Fachleute aus mehreren Ländern den Bartgeier in die Alpen zurück.',
+        '{K} Damals wurden in Österreich die ersten jungen Bartgeier freigelassen, 1991 folgten die ersten im Schweizerischen Nationalpark.',
+        'Die Jungvögel stammten aus Zuchtstationen und waren etwa drei Monate alt, also noch nicht flugfähig.',
+        '2007 zog im Nationalpark erstmals wieder ein Bartgeierpaar in freier Natur ein Junges gross.',
+        '{K} Heute leben in den Alpen wieder mehrere hundert Bartgeier.'
+      ]},
+      { h: null, s: [
+        'Auch bei der Familie geht der Bartgeier eigene Wege.',
+        '{P4} Das Weibchen legt seine Eier mitten im Winter, was für einen Vogel sehr ungewöhnlich ist.',
+        'Meist sind es zwei Eier, doch in der Regel überlebt nur eines der beiden Küken; das zweite Ei dient als Reserve.',
+        '{P4} Die Küken schlüpfen nach etwa 55 Tagen, also gegen Ende des Winters.',
+        'Bis ein junger Bartgeier zum ersten Mal fliegt, vergehen fast vier Monate.'
+      ]}
+    ],
+    overviewHint: 'Lies den Titel. Schau dir die Abbildung an. Lies von jedem Abschnitt nur den ersten Satz.',
+    themes: [
+      { t: 'Wie man einen Bartgeier zähmt', ok: false, why: 'Kein Anfangssatz handelt davon. Der Bartgeier ist ein Wildtier.' },
+      { t: 'Wovon sich der Bartgeier ernährt', ok: true, why: 'Richtig. Der erste Satz des 2. Abschnitts sagt: Der Bartgeier frisst fast nur Knochen.' },
+      { t: 'Bartgeier in Afrika und Asien', ok: false, why: 'Der Titel nennt die Alpen. Kein Anfangssatz spricht von anderen Erdteilen.' },
+      { t: 'Wie der Bartgeier in die Alpen zurückkam', ok: true, why: 'Richtig. Der Titel und der Anfang des 4. Abschnitts («Seit 1986 bringen Fachleute … zurück») zeigen das.' },
+      { t: 'Wie ein Nationalpark entsteht', ok: false, why: 'Kein Anfangssatz kündigt dieses Thema an.' },
+      { t: 'Wie schnell der Bartgeier fliegt', ok: false, why: 'Kein Anfangssatz spricht vom Tempo. Die Abbildung zeigt die Grösse.' }
+    ],
+    ideas: ['Was frisst der Bartgeier?', 'Warum war der Bartgeier verschwunden?', 'Wer hat den Bartgeier zurückgebracht?', 'Wann kam der Bartgeier in die Schweiz zurück?', 'Wie zieht der Bartgeier seine Jungen auf?', 'Warum heisst er Bartgeier?'],
+    questions: [
+      { q: 'Wie macht der Bartgeier grosse Knochen klein?',
+        opts: ['Er zerbeisst sie mit seinem kräftigen Schnabel.', 'Er weicht sie im Schlamm ein.', 'Er lässt sie aus grosser Höhe auf Felsplatten fallen.'],
+        correct: 2,
+        hint: 'Noch nicht. Lies nochmals den Abschnitt über die Nahrung des Bartgeiers.',
+        belegHint: 'Dieser Satz ist nicht der Beweis. Suche den Satz, in dem steht, was mit den grösseren Knochen passiert.' },
+      { q: 'Du siehst einen Bartgeier mit dunkelbraunem Kopf und dunkler Brust. Was weisst du über ihn?',
+        opts: ['Er ist jünger als etwa vier Jahre.', 'Er hat gerade im Schlamm gebadet.', 'Er ist ein Weibchen.'],
+        correct: 0,
+        hint: 'Noch nicht. Lies im ersten Abschnitt nach, wie junge und erwachsene Bartgeier aussehen.',
+        belegHint: 'Dieser Satz ist nicht der Beweis. Suche den Satz, der beschreibt, wie junge Bartgeier aussehen.' },
+      { q: 'Warum gab es vor über hundert Jahren in den Alpen keine Bartgeier mehr?',
+        opts: ['Es war ihnen in den Alpen zu kalt.', 'Die Menschen verfolgten sie mit Gewehren, Fallen und Gift.', 'Sie zogen alle nach Afrika.'],
+        correct: 1,
+        hint: 'Noch nicht. Lies nochmals den Abschnitt über den schlechten Ruf des Bartgeiers.',
+        belegHint: 'Dieser Satz ist nicht der Beweis. Suche den Satz, der sagt, was die Menschen dem Bartgeier angetan haben.' },
+      { q: 'Warum legt der Bartgeier seine Eier mitten im Winter?',
+        implicit: true,
+        opts: ['Weil es im Winter im Felsennest am wärmsten ist.', 'Damit die Küken dann schlüpfen, wenn es viel frisches Fleisch von toten Tieren gibt.', 'Weil im Winter keine Wanderer in den Bergen sind.', 'Weil die Eier im Schnee kühl bleiben müssen.'],
+        correct: 1,
+        hint: 'Noch nicht. Diese Antwort steht nicht in einem einzigen Satz. Verbinde zwei Stellen: Wann schlüpfen die Küken? Und was finden die Geier zu dieser Zeit?',
+        belegHint: 'Dieser Satz hilft hier nicht weiter. Suche den Satz, der sagt, was die Geier gegen Ende des Winters finden.',
+        partnerHint: 'Gut gedacht – dieser Satz gehört dazu! Er ist aber nur die eine Hälfte. Tippe jetzt den Satz an, der sagt, was die Geier gegen Ende des Winters in den Bergen finden.' }
+    ]
+  }
+};
+
+/* ---------- Zustand ---------- */
+var STORE_KEY = 'sachtext-detektiv-w3';
+var RESUME_MS = 3 * 60 * 60 * 1000;
+var STEP_NAMES = ['', 'Überblicken', 'Fragen', 'Lesen und Markieren', 'Beweise finden', 'Rückblick', 'Codewort'];
+var S;
+function fresh() {
+  return { level: null, step: 0, done: {}, themes: [], themesChecked: false,
+           questions: [], marks: [], compared: false,
+           qi: 0, qPhase: 'answer', tried: [], belegFound: false, rueck: {} };
+}
+S = fresh();
+
+var app = document.getElementById('app');
+var toast = document.getElementById('toast');
+
+function esc(t) {
+  return String(t).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+function decode(b) { return atob(b).split('').reverse().join(''); }
+
+/* Sätze einmalig aufbereiten */
+Object.keys(DATA).forEach(function (lv) {
+  var n = 0;
+  DATA[lv].paras.forEach(function (p) {
+    p.sents = p.s.map(function (raw) {
+      var m = raw.match(/^\{([^}]*)\}\s*/);
+      return { id: lv + '-' + (n++), text: m ? raw.slice(m[0].length) : raw,
+               tags: m ? m[1].split(',').map(function (x) { return x.trim(); }) : [] };
+    });
+  });
+});
+function allSents(lv) {
+  var out = [];
+  DATA[lv].paras.forEach(function (p) { out = out.concat(p.sents); });
+  return out;
+}
+function sentById(id) {
+  return allSents(S.level).filter(function (s) { return s.id === id; })[0];
+}
+
+/* ---------- Speicher: nur «zuletzt erreichter Schritt» ---------- */
+function store(step) {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({ level: S.level, step: step, t: Date.now() })); } catch (e) {}
+}
+function readStore() {
+  try {
+    var v = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+    if (v && DATA[v.level] && v.step >= 1 && v.step <= 5 && Date.now() - v.t < RESUME_MS) return v;
+  } catch (e) {}
+  return null;
+}
+function clearStore() { try { localStorage.removeItem(STORE_KEY); } catch (e) {} }
+
+/* ---------- Rahmen ---------- */
+function showToast(kind, html) {
+  toast.innerHTML = '<div class="fb fb-' + kind + '">' + html + '</div>';
+  toast.hidden = false;
+}
+function hideToast() { toast.hidden = true; toast.innerHTML = ''; }
+
+function frame() {
+  var lvl = document.getElementById('lvl');
+  var prog = document.getElementById('prog');
+  var rs = document.getElementById('restart');
+  if (S.step === 0) { lvl.hidden = true; prog.hidden = true; rs.hidden = true; return; }
+  lvl.hidden = false; lvl.textContent = DATA[S.level].label;
+  rs.hidden = false; prog.hidden = false;
+  var pct = Math.round((S.step - 1) / 6 * 100);
+  if (S.step === 6) pct = 100;
+  document.getElementById('progFill').style.width = pct + '%';
+  prog.querySelector('[role=progressbar]').setAttribute('aria-valuenow', S.step);
+  document.getElementById('progTxt').textContent = 'Schritt ' + S.step + ' von 6: ' + STEP_NAMES[S.step];
+}
+
+function go(step) {
+  /* Das Codewort ist nur nach Abschluss von Schritt 1–5 erreichbar. */
+  if (step === 6) {
+    for (var k = 1; k <= 5; k++) { if (!S.done[k]) { step = k; break; } }
+  }
+  S.step = step;
+  hideToast();
+  if (step >= 1 && step <= 5) store(step);
+  frame();
+  [renderStart, renderOverview, renderQuestions, renderMark, renderProof, renderReview, renderCode][step]();
+  window.scrollTo(0, 0);
+  var h = app.querySelector('h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
+}
+
+function textHTML(lv, opts) {
+  var d = DATA[lv], h = '<article class="text' + (opts.tap ? ' tap' : '') + '" id="txt">';
+  h += '<h2 class="ttl">' + esc(d.title) + '</h2>';
+  d.paras.forEach(function (p, i) {
+    if (p.h) h += '<h3>' + esc(p.h) + '</h3>';
+    h += '<p>' + p.sents.map(function (s) {
+      return '<span class="s" data-id="' + s.id + '"' + (opts.tap ? ' role="button" tabindex="0"' : '') + '>' + esc(s.text) + '</span>';
+    }).join(' ') + '</p>';
+    if (i === 0 && opts.fig) h += FIG;
+  });
+  return h + '</article>';
+}
+function bindSentences(handler) {
+  app.querySelectorAll('#txt .s').forEach(function (el) {
+    el.addEventListener('click', function () { handler(el); });
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(el); }
+    });
+  });
+}
+function stratCard(n, title, body) {
+  return '<section class="card strat"><h2><span class="num">' + n + '</span>' + title + '</h2>' + body + '</section>';
+}
+
+/* ---------- Start ---------- */
+function renderStart() {
+  var r = readStore(), h = '';
+  h += '<h1>Sachtext-Detektiv</h1>';
+  h += '<p class="lead">Du knackst einen Sachtext mit den drei Schritten <strong>Überblicken – Fragen – Lesen</strong>. Am Schluss bekommst du ein Codewort für deinen Wochenplan.</p>';
+  if (r) {
+    h += '<div class="fb fb-blue"><p>Du warst schon bei <strong>Schritt ' + r.step + ' (' + STEP_NAMES[r.step] + ')</strong> in der ' + DATA[r.level].label + '.</p>' +
+         '<div class="row"><button class="btn" type="button" id="resume">Dort weitermachen</button></div></div>';
+  }
+  h += '<h2>Wähle dein Niveau</h2><div class="levels">' +
+       '<button class="level-btn" type="button" data-lv="5">5. Klasse<small>Text mit Zwischentiteln</small></button>' +
+       '<button class="level-btn" type="button" data-lv="6">6. Klasse<small>Längerer Text, eine Knobelfrage</small></button></div>';
+  app.innerHTML = h;
+  app.querySelectorAll('.level-btn').forEach(function (b) {
+    b.addEventListener('click', function () { S = fresh(); S.level = b.dataset.lv; go(1); });
+  });
+  if (r) document.getElementById('resume').addEventListener('click', function () {
+    S = fresh(); S.level = r.level;
+    for (var k = 1; k < r.step; k++) S.done[k] = true;
+    go(r.step);
+  });
+}
+
+/* ---------- a) Überblicken ---------- */
+function renderOverview() {
+  var d = DATA[S.level], h = '';
+  h += '<h1>Überblicken</h1>';
+  h += stratCard(1, 'Überblicken', '<p>' + d.overviewHint + '</p>');
+  h += '<article class="text"><h2 class="ttl">' + esc(d.title) + '</h2>';
+  d.paras.forEach(function (p, i) {
+    if (S.level === '5') {
+      if (p.h) h += '<h3>' + esc(p.h) + '</h3>';
+    } else {
+      h += '<p class="first">' + esc(p.sents[0].text) + '</p>';
+    }
+    h += '<div class="hidden-lines" aria-hidden="true"><i></i><i></i><i></i></div>';
+    if (i === 0) h += FIG;
+  });
+  h += '</article>';
+  h += '<h2>Welche 2 Themen behandelt der Text wohl?</h2><p class="lead">Tippe genau 2 Themen an.</p>';
+  h += '<div class="choices" id="themes">' + d.themes.map(function (t, i) {
+    return '<button class="choice" type="button" data-i="' + i + '" aria-pressed="false">' + esc(t.t) + '</button>';
+  }).join('') + '</div>';
+  h += '<div id="themeFb"></div><div class="row"><button class="btn" type="button" id="check" disabled>Prüfen</button>' +
+       '<button class="btn" type="button" id="next" hidden>Weiter zu Schritt 2</button></div>';
+  app.innerHTML = h;
+
+  var btns = app.querySelectorAll('#themes .choice');
+  var check = document.getElementById('check'), next = document.getElementById('next'), fb = document.getElementById('themeFb');
+  function paint() {
+    btns.forEach(function (b) {
+      var i = +b.dataset.i, sel = S.themes.indexOf(i) >= 0;
+      b.setAttribute('aria-pressed', sel ? 'true' : 'false');
+      b.classList.remove('ok', 'tried');
+      if (S.themesChecked && sel) b.classList.add(d.themes[i].ok ? 'ok' : 'tried');
+    });
+    check.disabled = S.themes.length !== 2;
+  }
+  btns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (S.done[1]) return;
+      var i = +b.dataset.i, pos = S.themes.indexOf(i);
+      S.themesChecked = false; fb.innerHTML = '';
+      if (pos >= 0) S.themes.splice(pos, 1);
+      else if (S.themes.length < 2) S.themes.push(i);
+      else fb.innerHTML = '<div class="fb fb-orange"><p>Du hast schon 2 Themen gewählt. Tippe ein gewähltes Thema nochmals an, um es abzuwählen.</p></div>';
+      paint();
+    });
+  });
+  check.addEventListener('click', function () {
+    S.themesChecked = true;
+    var all = true, out = '';
+    S.themes.forEach(function (i) {
+      var t = d.themes[i];
+      if (!t.ok) all = false;
+      out += '<div class="fb ' + (t.ok ? 'fb-green' : 'fb-orange') + '"><p><strong>' + esc(t.t) + ':</strong> ' + esc(t.why) + '</p></div>';
+    });
+    if (all) {
+      S.done[1] = true;
+      out += '<div class="fb fb-blue"><p>Gut überblickt! Du weisst jetzt schon ungefähr, worum es geht.</p></div>';
+      check.hidden = true; next.hidden = false;
+    } else {
+      out += '<div class="fb fb-blue"><p>Wähle ein anderes Thema und prüfe nochmals.</p></div>';
+    }
+    fb.innerHTML = out; paint();
+  });
+  next.addEventListener('click', function () { go(2); });
+  paint();
+}
+
+/* ---------- b) Fragen ---------- */
+function questionForm(n) {
+  var d = DATA[S.level], h = '';
+  h += '<p><strong>W-Bausteine:</strong> Tippe einen Baustein an, er kommt in dein Feld.</p><div class="chips" id="wchips">' +
+       ['Wer', 'Was', 'Wo', 'Wann', 'Warum', 'Wie', 'der Bartgeier'].map(function (w) {
+         return '<button class="chip" type="button" data-w="' + w + '">' + w + (w === 'der Bartgeier' ? '' : '?') + '</button>';
+       }).join('') + '</div>';
+  for (var i = 0; i < n; i++) {
+    h += '<label class="ql" for="q' + i + '">Meine Frage ' + (i + 1) + '</label>' +
+         '<input class="q" id="q' + i + '" type="text" maxlength="120" autocomplete="off" spellcheck="true" value="' + esc(S.questions[i] || '') + '">';
+  }
+  h += '<div class="row"><button class="btn sec" type="button" id="ideasBtn" aria-expanded="false">Ideen anzeigen</button></div>' +
+       '<div id="ideas" hidden><p>Du kannst auch eine Idee antippen. Sie kommt ins nächste leere Feld.</p><div class="choices">' +
+       d.ideas.map(function (q) { return '<button class="choice" type="button" data-q="' + esc(q) + '">' + esc(q) + '</button>'; }).join('') +
+       '</div></div><div id="qFb"></div>';
+  return h;
+}
+function bindQuestionForm(n, onDone, doneBtn) {
+  var inputs = [], last = null;
+  for (var i = 0; i < n; i++) inputs.push(document.getElementById('q' + i));
+  inputs.forEach(function (inp) { inp.addEventListener('focus', function () { last = inp; }); });
+  function target() {
+    if (last && last.value.trim() === '') return last;
+    var empty = inputs.filter(function (x) { return x.value.trim() === ''; })[0];
+    return empty || last || inputs[inputs.length - 1];
+  }
+  app.querySelectorAll('#wchips .chip').forEach(function (c) {
+    c.addEventListener('click', function () {
+      var inp = last || target(), w = c.dataset.w;
+      var v = inp.value, pos = (typeof inp.selectionStart === 'number' && document.activeElement === inp) ? inp.selectionStart : v.length;
+      var before = v.slice(0, pos), after = v.slice(pos);
+      var ins = (before && !/\s$/.test(before) ? ' ' : '') + w + ' ';
+      inp.value = (before + ins + after).replace(/\s{2,}/g, ' ');
+      inp.focus(); var p = (before + ins).length; try { inp.setSelectionRange(p, p); } catch (e) {}
+    });
+  });
+  var ib = document.getElementById('ideasBtn');
+  ib.addEventListener('click', function () {
+    var box = document.getElementById('ideas'); box.hidden = !box.hidden;
+    ib.setAttribute('aria-expanded', String(!box.hidden));
+    ib.textContent = box.hidden ? 'Ideen anzeigen' : 'Ideen verbergen';
+  });
+  app.querySelectorAll('#ideas .choice').forEach(function (c) {
+    c.addEventListener('click', function () { var t = target(); t.value = c.dataset.q; t.focus(); });
+  });
+  doneBtn.addEventListener('click', function () {
+    var vals = inputs.map(function (x) { return x.value.replace(/\s+/g, ' ').trim(); });
+    var fb = document.getElementById('qFb');
+    var short = vals.some(function (v) { return v.split(' ').filter(Boolean).length < 2; });
+    if (short) { fb.innerHTML = '<div class="fb fb-orange"><p>Schreib in jedes Feld eine Frage mit mindestens zwei Wörtern.</p></div>'; return; }
+    var low = vals.map(function (v) { return v.toLowerCase().replace(/\?+$/, ''); });
+    if (low.some(function (v, i) { return low.indexOf(v) !== i; })) {
+      fb.innerHTML = '<div class="fb fb-orange"><p>Zwei Fragen sind gleich. Schreib eine andere Frage.</p></div>'; return;
+    }
+    S.questions = vals.map(function (v) { return /\?$/.test(v) ? v : v + '?'; });
+    onDone();
+  });
+}
+function renderQuestions() {
+  var n = DATA[S.level].nQuestions, h = '';
+  h += '<h1>Fragen</h1>';
+  h += stratCard(2, 'Fragen', '<p>Überlege dir W-Fragen (Wer? Was? Wo? Wann? Warum?), die der Text wohl beantworten wird.</p><p><strong>Schreib ' + n + ' eigene Fragen.</strong></p>');
+  h += '<section class="card">' + questionForm(n) + '<div class="row"><button class="btn" type="button" id="next">Weiter zu Schritt 3</button></div></section>';
+  h += '<p class="lead">Deine Fragen werden nirgends gespeichert. Sie verschwinden, wenn du die Seite schliesst.</p>';
+  app.innerHTML = h;
+  bindQuestionForm(n, function () { S.done[2] = true; go(3); }, document.getElementById('next'));
+}
+
+/* ---------- c) Lesen und Markieren ---------- */
+function renderMark() {
+  var h = '';
+  h += '<h1>Lesen und Markieren</h1>';
+  h += stratCard(3, 'Lesen', '<p>Lies den Text aufmerksam. Markiere die wichtigsten Stellen: Tippe einen Satz an. Nochmals antippen nimmt die Markierung weg.</p><span class="rule">Markierregel: höchstens 5 Stellen!</span>');
+  h += '<p class="counter" id="cnt" aria-live="polite"></p>';
+  h += textHTML(S.level, { tap: true, fig: S.level === '5' });
+  h += '<div id="cmpFb"></div><div class="row"><button class="btn" type="button" id="cmp">Fertig – mit der Lehrperson vergleichen</button>' +
+       '<button class="btn" type="button" id="next" hidden>Weiter zu Schritt 4</button></div>';
+  app.innerHTML = h;
+  var cnt = document.getElementById('cnt'), cmp = document.getElementById('cmp');
+  function paint() {
+    app.querySelectorAll('#txt .s').forEach(function (el) {
+      el.classList.toggle('marked', S.marks.indexOf(el.dataset.id) >= 0);
+      el.setAttribute('aria-pressed', S.marks.indexOf(el.dataset.id) >= 0 ? 'true' : 'false');
+    });
+    cnt.textContent = 'Markiert: ' + S.marks.length + ' von höchstens 5';
+    cmp.disabled = S.marks.length === 0;
+  }
+  bindSentences(function (el) {
+    if (S.compared) return;
+    var id = el.dataset.id, pos = S.marks.indexOf(id);
+    if (pos >= 0) { S.marks.splice(pos, 1); hideToast(); }
+    else if (S.marks.length >= 5) {
+      showToast('orange', '<p><strong>Höchstens 5 Stellen!</strong> Nimm zuerst eine Markierung weg: Tippe einen markierten Satz nochmals an.</p>');
+    } else { S.marks.push(id); hideToast(); }
+    paint();
+  });
+  cmp.addEventListener('click', function () {
+    S.compared = true; hideToast();
+    var keys = allSents(S.level).filter(function (s) { return s.tags.indexOf('K') >= 0; });
+    var hit = 0;
+    keys.forEach(function (s) {
+      var el = app.querySelector('#txt .s[data-id="' + s.id + '"]');
+      el.classList.remove('marked');
+      if (S.marks.indexOf(s.id) >= 0) { hit++; el.classList.add('key-hit'); } else el.classList.add('key-miss');
+    });
+    app.querySelectorAll('#txt .s').forEach(function (el) { el.removeAttribute('role'); el.removeAttribute('tabindex'); el.removeAttribute('aria-pressed'); });
+    app.querySelector('#txt').classList.remove('tap');
+    var msg = hit === 5 ? 'Stark! Du hast alle 5 Schlüsselsätze gefunden.' :
+              'Du hast <strong>' + hit + ' von 5</strong> Schlüsselsätzen der Lehrperson getroffen.';
+    document.getElementById('cmpFb').innerHTML =
+      '<div class="fb fb-green"><p>' + msg + '</p></div>' +
+      '<div class="legend"><span style="background:var(--green-bg)">grün = gleich wie die Lehrperson</span>' +
+      '<span style="background:var(--blue-bg)">blau = Schlüsselsatz der Lehrperson</span>' +
+      '<span style="background:var(--mark)">gelb = deine weitere Markierung</span></div>' +
+      '<div class="fb fb-blue"><p>Deine gelben Stellen können auch sinnvoll sein. Frag dich: Ist das eine Hauptsache oder ein Detail? Die Lehrperson hat die Sätze gewählt, die sagen, worum es im ganzen Abschnitt geht.</p></div>';
+    cmp.hidden = true; document.getElementById('next').hidden = false;
+    S.done[3] = true;
+    document.getElementById('cmpFb').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+  document.getElementById('next').addEventListener('click', function () { go(4); });
+  paint();
+}
+
+/* ---------- d) Beweise finden ---------- */
+function renderProof() {
+  var d = DATA[S.level], q = d.questions[S.qi], h = '';
+  h += '<h1>Beweise finden</h1>';
+  h += '<div class="split"><div class="side"><section class="card qcard">';
+  h += '<div class="qnum">Frage ' + (S.qi + 1) + ' von ' + d.questions.length + '</div>';
+  if (q.implicit) h += '<span class="knobel">Knobelfrage: Verbinde zwei Stellen im Text</span>';
+  h += '<h2>' + esc(q.q) + '</h2><div class="choices" id="opts">' + q.opts.map(function (o, i) {
+    return '<button class="choice" type="button" data-i="' + i + '">' + esc(o) + '</button>';
+  }).join('') + '</div><div id="ansFb"></div>';
+  h += '<div class="row"><button class="btn" type="button" id="next" hidden>' +
+       (S.qi + 1 < d.questions.length ? 'Nächste Frage' : 'Weiter zu Schritt 5') + '</button></div>';
+  h += '</section></div><div>' + textHTML(S.level, { tap: true, fig: S.level === '5' }) + '</div></div>';
+  app.innerHTML = h;
+
+  var fb = document.getElementById('ansFb'), next = document.getElementById('next');
+  function paint() {
+    app.querySelectorAll('#opts .choice').forEach(function (b) {
+      var i = +b.dataset.i;
+      b.classList.toggle('tried', S.tried.indexOf(i) >= 0);
+      b.classList.toggle('ok', S.qPhase !== 'answer' && i === q.correct);
+      b.disabled = S.qPhase !== 'answer' || S.tried.indexOf(i) >= 0;
+    });
+    app.querySelector('#txt').classList.toggle('tap', S.qPhase === 'beleg');
+  }
+  app.querySelectorAll('#opts .choice').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (S.qPhase !== 'answer') return;
+      var i = +b.dataset.i;
+      if (i === q.correct) {
+        S.qPhase = 'beleg';
+        fb.innerHTML = '<div class="fb fb-green"><p><strong>Richtig!</strong> Jetzt brauchst du den Beweis: Tippe im Text den Satz an, der deine Antwort belegt.</p></div>';
+        hideToast();
+      } else {
+        S.tried.push(i);
+        fb.innerHTML = '<div class="fb fb-orange"><p>' + esc(q.hint) + '</p><p>Versuch es nochmals.</p></div>';
+      }
+      paint();
+    });
+  });
+  bindSentences(function (el) {
+    if (S.qPhase !== 'beleg') {
+      if (S.qPhase === 'answer') showToast('blue', '<p>Wähle zuerst oben eine Antwort. Danach suchst du den Beweis im Text.</p>');
+      return;
+    }
+    var s = sentById(el.dataset.id), tagB = 'B' + (S.qi + 1), tagP = 'P' + (S.qi + 1);
+    app.querySelectorAll('#txt .s').forEach(function (x) { x.classList.remove('beleg-try', 'beleg-partner'); });
+    if (s.tags.indexOf(tagB) >= 0) {
+      S.qPhase = 'done';
+      el.classList.add('beleg-ok');
+      showToast('green', '<p><strong>Beweis gefunden!</strong> Genau dieser Satz belegt deine Antwort.</p>');
+      fb.innerHTML += '<div class="fb fb-green"><p>Beweis: «' + esc(s.text) + '»</p></div>';
+      next.hidden = false; paint();
+    } else if (s.tags.indexOf(tagP) >= 0 && q.partnerHint) {
+      el.classList.add('beleg-partner');
+      showToast('blue', '<p>' + esc(q.partnerHint) + '</p>');
+    } else {
+      el.classList.add('beleg-try');
+      showToast('orange', '<p>' + esc(q.belegHint) + '</p>');
+    }
+  });
+  next.addEventListener('click', function () {
+    if (S.qi + 1 < d.questions.length) {
+      S.qi++; S.qPhase = 'answer'; S.tried = []; hideToast(); renderProof(); window.scrollTo(0, 0);
+    } else { S.done[4] = true; go(5); }
+  });
+  paint();
+}
+
+/* ---------- e) Rückblick ---------- */
+function renderReview() {
+  var n = DATA[S.level].nQuestions, h = '';
+  h += '<h1>Rückblick</h1>';
+  if (!S.questions.length) {
+    h += '<div class="fb fb-blue"><p>Deine Fragen aus Schritt 2 sind nach dem Neuladen nicht mehr da. Schreib sie nochmals kurz auf.</p></div>';
+    h += '<section class="card">' + questionForm(n) + '<div class="row"><button class="btn" type="button" id="qok">Weiter zum Rückblick</button></div></section>';
+    app.innerHTML = h;
+    bindQuestionForm(n, renderReview, document.getElementById('qok'));
+    return;
+  }
+  h += '<p class="lead">Hat der Text deine Fragen aus Schritt 2 beantwortet? Tippe bei jeder Frage an.</p>';
+  var OPTS = [['ja', 'Ja'], ['teil', 'Teilweise'], ['nein', 'Nein']];
+  var FB = {
+    ja: 'Super – der Text hat deine Frage beantwortet. Gute Fragen helfen beim Lesen.',
+    teil: 'Ein Teil fehlt noch. Wo könntest du weiterlesen? Zum Beispiel in einem Sachbuch oder Lexikon.',
+    nein: 'Das kommt oft vor: Ein Text beantwortet nicht jede Frage. Deine Frage zeigt, was du noch wissen möchtest.'
+  };
+  S.questions.forEach(function (q, i) {
+    h += '<section class="card"><p class="myq">«' + esc(q) + '»</p><div class="rb" data-q="' + i + '">' +
+         OPTS.map(function (o) {
+           return '<button class="choice" type="button" data-v="' + o[0] + '" aria-pressed="' + (S.rueck[i] === o[0]) + '">' + o[1] + '</button>';
+         }).join('') + '</div><div class="rfb">' + (S.rueck[i] ? '<div class="fb fb-blue"><p>' + FB[S.rueck[i]] + '</p></div>' : '') + '</div></section>';
+  });
+  h += '<div class="row"><button class="btn" type="button" id="fin">Abschliessen</button></div>';
+  app.innerHTML = h;
+  var fin = document.getElementById('fin');
+  function ready() { fin.disabled = S.questions.some(function (_, i) { return !S.rueck[i]; }); }
+  app.querySelectorAll('.rb').forEach(function (g) {
+    var i = +g.dataset.q;
+    g.querySelectorAll('.choice').forEach(function (b) {
+      b.addEventListener('click', function () {
+        S.rueck[i] = b.dataset.v;
+        g.querySelectorAll('.choice').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+        g.parentNode.querySelector('.rfb').innerHTML = '<div class="fb fb-blue"><p>' + FB[b.dataset.v] + '</p></div>';
+        ready();
+      });
+    });
+  });
+  fin.addEventListener('click', function () { S.done[5] = true; go(6); });
+  ready();
+}
+
+/* ---------- f) Codewort ---------- */
+function renderCode() {
+  clearStore();
+  var h = '<h1 class="center">Fall gelöst!</h1>';
+  h += '<p class="center lead">Du hast überblickt, Fragen gestellt, gelesen, markiert und Beweise gefunden.</p>';
+  h += '<p class="center">Dein Codewort:</p><div class="code" id="code">' + esc(decode(DATA[S.level].code)) + '</div>';
+  h += '<p class="center" style="font-size:1.25rem;font-weight:700">Schreib das Codewort in deinen Wochenplan.</p>';
+  h += '<div class="row" style="justify-content:center"><button class="btn sec" type="button" id="again">Zurück zum Start</button></div>';
+  app.innerHTML = h;
+  document.getElementById('again').addEventListener('click', function () { S = fresh(); go(0); });
+}
+
+document.getElementById('restart').addEventListener('click', function () {
+  if (window.confirm('Wirklich neu starten? Dann beginnst du wieder bei der Niveau-Wahl.')) { clearStore(); S = fresh(); go(0); }
+});
+
+go(0);
+})();
+</script>
+</body>
+</html>
